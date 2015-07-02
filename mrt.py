@@ -52,7 +52,7 @@ def readConf():
 	global startupPath
 	writelog("Read mrt.conf")
 	config = ConfigParser.RawConfigParser()
-	config.read(startupPath+'mrt.conf')
+	config.read(startupPath+'/mrt.conf')
 	apiKey = config.get('TMDB', 'key')
 	language = config.get('TMDB', 'language')
 	filenameFormat = config.get('MRT', 'format')
