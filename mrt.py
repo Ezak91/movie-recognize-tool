@@ -62,7 +62,8 @@ def readConf():
 
 def openlog():
 	global log
-	log = open('mrt.log','w')
+	global startupPath
+	log = open(startupPath+'/mrt.log','w')
 
 def writelog( message ):
 	global log
