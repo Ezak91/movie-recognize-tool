@@ -37,18 +37,22 @@ def initial():
 	global movieTitle
 	global releaseYear
 	global fileName
+	global startupPath
+	startupPath = os.path.dirname(os.path.abspath(sys.argv[0]))
 	newline = '\n'
 	openlog()
 	writelog("Start MRT")
+	writelog("Scriptpath: " + startupPath)
 	readConf()
 
 def readConf():
 	global apiKey
 	global language
 	global filenameFormat
+	global startupPath
 	writelog("Read mrt.conf")
 	config = ConfigParser.RawConfigParser()
-	config.read('mrt.conf')
+	config.read(startupPath+'mrt.conf')
 	apiKey = config.get('TMDB', 'key')
 	language = config.get('TMDB', 'language')
 	filenameFormat = config.get('MRT', 'format')
