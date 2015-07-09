@@ -38,6 +38,8 @@ def initial():
 	global releaseYear
 	global fileName
 	global startupPath
+	global move
+	global destinationPath
 	startupPath = os.path.dirname(os.path.abspath(sys.argv[0]))
 	newline = '\n'
 	openlog()
@@ -50,15 +52,23 @@ def readConf():
 	global language
 	global filenameFormat
 	global startupPath
+	global destinationPath
+	global move
 	writelog("Read mrt.conf")
 	config = ConfigParser.RawConfigParser()
 	config.read(startupPath+'/mrt.conf')
 	apiKey = config.get('TMDB', 'key')
 	language = config.get('TMDB', 'language')
 	filenameFormat = config.get('MRT', 'format')
+	move = config.get('MRT','move')
+	destinationPath = config.get('MRT','destinationpath')
+
+
 	writelog("Apikey: "+apiKey)
 	writelog("Language: "+language)
 	writelog("Format: "+filenameFormat)
+	writelog("Move: "+move)
+	writelog("Destinationpath: "+destinationPath)
 
 def openlog():
 	global log
@@ -75,16 +85,15 @@ def closelog():
 
 def checkparam():
 	global archiveOutput
-	if (len(sys.argv) < 5):		
+	if (len(sys.argv) < 4):		
 		writelog("Not enough arguments (download.id, download.name, download.file, archive.output)")
 		return False
 	else:
 		writelog("Read arguments")
 		downloadID = sys.argv[1]
 		downloadName = sys.argv[2]
-		downloadFile = sys.argv[3]
-		archiveOutput = sys.argv[4]
-		writelog("ID: " + downloadID + newline + "Name: " + downloadName + newline + "File: " + downloadFile + newline + "Outputdirectory: " + archiveOutput);
+		archiveOutput = sys.argv[3]
+		writelog("ID: " + downloadID + newline + "Name: " + downloadName + newline + "Outputdirectory: " + archiveOutput);
 		return True
 
 def findNFO():
@@ -148,7 +157,8 @@ def renameMovie():
 	global movieTitle
 	global filenameFormat
 	global releaseYear
-	newFilename = filenameFormat.replace("%t",movieTitle)
+	global newFileName
+	newFilename = filenameFormat.replace("%t",movieTitle.encode('utf-8'))
 	newFilename = newFilename.replace("%y",str(releaseYear))
 	name, fileExtension = os.path.splitext(fileName)
 	newFileName = os.path.dirname(fileName) + "/" + newFilename + fileExtension
@@ -160,6 +170,18 @@ def renameMovie():
 		writelog("Failed to rename movie from "+fileName+" to "+newFileName)
 		return False
 
+def moveMovie():
+	global move
+	global destinationPath
+	global newFileName
+	if move == "True":
+		destinationFile = destinationPath+"/"+os.path.basename(newFileName)
+		print("newFilename: "+newFileName)
+		print("destinationFile:"+destinationFile)
+		os.rename(newFileName, destinationFile)
+		writelog("Copy movie from "+newFileName+" to "+destinationFile)
+
+
 def main():
 	initial()
 	if checkparam():
@@ -167,6 +189,7 @@ def main():
 			if findMovie():
 				readTMDBData()
 				renameMovie()
+				moveMovie()
 	writelog("End")
 	closelog()
 
