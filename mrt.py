@@ -25,6 +25,7 @@ import json
 import sys
 import os
 import re
+import requests
 
 def initial():
 	global log
@@ -53,6 +54,9 @@ def readConf():
 	global filenameFormat
 	global startupPath
 	global destinationPath
+	global muhviehUser
+	global muhviehPasswort
+	global muhviehUrl
 	global move
 	writelog("Read mrt.conf")
 	config = ConfigParser.RawConfigParser()
@@ -62,8 +66,9 @@ def readConf():
 	filenameFormat = config.get('MRT', 'format')
 	move = config.get('MRT','move')
 	destinationPath = config.get('MRT','destinationpath')
-
-
+	muhviehUser = config.get('MUHVIEH','user')
+	muhviehPasswort = config.get('MUHVIEH','password')
+	muhviehUrl = config.get('MUHVIEH','host')
 	writelog("Apikey: "+apiKey)
 	writelog("Language: "+language)
 	writelog("Format: "+filenameFormat)
@@ -132,9 +137,10 @@ def readTMDBData():
 	getMovietitle(response_body)
 
 def getMovietitle(jsonData):
-    data = json.loads(jsonData)
+    global data
     global movieTitle
     global releaseYear
+    data = json.loads(jsonData)
     movieTitle = data['movie_results'][0]['title']
     datestring = data['movie_results'][0]['release_date']
     dt = datetime.strptime(datestring, '%Y-%m-%d')
@@ -181,8 +187,18 @@ def moveMovie():
 		os.rename(newFileName, destinationFile)
 		writelog("Copy movie from "+newFileName+" to "+destinationFile)
 
-def addToMuhvieh()
-	
+
+def addToMuhvieh():
+	global data
+	global muhviehUser
+	global muhviehPasswort
+	global muhviehUrl
+	global language
+	tmdbID = data['movie_results'][0]['id']
+	url = muhviehUrl+"/includes/api.php"
+	postData = {'username': muhviehUser, 'password': muhviehUrl, 'apikey': apiKey, 'language': language, 'action': 'addmovie', 'movieid': tmdbID, }
+	r = requests.post(url, data=postData)
+	writelog("Film wurde zu Muhvieh hinzugefügt")
 
 def main():
 	initial()
